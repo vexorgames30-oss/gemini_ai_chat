@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VXAI-PRO</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+:root{--accent:#ff3e00;--bg:#000;--s1:#0a0a0a;--s2:#141414;--s3:#1a1a1a;--b:#222;--b2:#333;--txt:#ececf1;--muted:#8e8ea0;--green:#10a37f;--user-bg:#2a2b32}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex;overflow:hidden}
+.intro{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeOut 0.5s ease 2s forwards}
+.intro-v{font-size:120px;font-weight:900;color:var(--accent);animation:vIntro 2s ease forwards;text-shadow:0 0 60px var(--accent)}
+@keyframes vIntro{0%{transform:scale(0) rotate(-180deg);opacity:0}50%{transform:scale(1.2) rotate(10deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes fadeOut{to{opacity:0;visibility:hidden}}
+.sidebar{width:260px;background:var(--s1);border-right:1px solid var(--b);display:flex;flex-direction:column;transition:0.3s;z-index:100}
+.sidebar.hidden{margin-left:-260px}
+@media(max-width:768px){.sidebar{position:fixed;left:0;top:0;bottom:0;box-shadow:2px 0 10px rgba(0,0,0,0.5)}.sidebar.hidden{margin-left:-260px}}
+.logo{display:flex;align-items:center;gap:10px;padding:14px;font-size:18px;font-weight:700;border-bottom:1px solid var(--b)}
+.logo-v{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px}
+.new-chat-btn{margin:12px;padding:12px;background:transparent;border:1px solid var(--b2);border-radius:8px;color:var(--txt);cursor:pointer;font-weight:500;display:flex;align-items:center;gap:8px;transition:0.2s}
+.new-chat-btn:hover{background:var(--s2);border-color:var(--accent)}
+.chats{flex:1;overflow-y:auto;padding:8px}
+.chat-item{padding:10px 12px;margin:2px 0;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-size:14px;transition:0.2s;position:relative}
+.chat-item:hover{background:var(--s2)}
+.chat-item.active{background:var(--s3)}
+.chat-item-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px}
+.chat-actions{display:flex;gap:4px;opacity:0;transition:0.2s}
+.chat-item:hover.chat-actions{opacity:1}
+.chat-action{width:28px;height:28px;border:2px solid var(--accent);background:var(--s2);color:var(--accent);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;z-index:10}
+.chat-action:hover{background:var(--accent);color:#fff;transform:scale(1.1)}
+.user-section{padding:12px;border-top:1px solid var(--b);display:flex;align-items:center;gap:10px}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:600}
+.main{flex:1;display:flex;flex-direction:column;position:relative;min-width:0}
+.header{padding:14px 20px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:12px}
+.menu-btn{width:32px;height:32px;border:none;background:transparent;color:var(--txt);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.menu-btn:hover{background:var(--s2)}
+.messages{flex:1;overflow-y:auto;padding:0}
+.msg-wrapper{width:100%}
+.msg-wrapper.user{background:transparent}
+.msg-wrapper.ai{background:var(--s1);border-bottom:1px solid var(--b)}
+.msg{max-width:800px;margin:0 auto;padding:24px 20px;display:flex;gap:20px;animation:slideIn 0.3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse;padding-left:20px;padding-right:20px}
+.msg.user.content{max-width:70%;background:var(--user-bg);padding:12px 16px;border-radius:18px 18px 4px 18px;margin-left:auto}
+.avatar{width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:14px}
+.msg.user.avatar{background:var(--green)}
+.msg.ai.avatar{background:var(--accent);animation:vPulse 2s ease infinite}
+@keyframes vPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,62,0,0.4)}50%{box-shadow:0 0 0 8px rgba(255,62,0,0)}}
+.content{line-height:1.75;font-size:15px;overflow-x:auto}
+.msg.ai.content{flex:1;padding-right:20px}
+.content p{margin:8px 0}
+.content pre{background:var(--bg);border:1px solid var(--b);border-radius:8px;margin:12px 0;position:relative}
+.content pre code{display:block;padding:16px;overflow-x:auto;font-family:'Consolas',monospace;font-size:13px}
+.code-header{background:var(--s2);padding:8px 12px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);border-radius:8px 8px 0 0}
+.copy-btn{padding:4px 8px;background:transparent;border:1px solid var(--b2);border-radius:4px;color:var(--muted);cursor:pointer;font-size:12px}
+.copy-btn:hover{background:var(--s3);color:var(--txt)}
+.content ul,.content ol{margin:8px 0 8px 20px}
+.content li{margin:4px 0}
+.welcome{max-width:800px;margin:0 auto;padding:40px 20px;text-align:center}
+.welcome-logo{font-size:72px;font-weight:900;color:var(--accent);margin-bottom:20px;text-shadow:0 0 40px var(--accent);animation:vGlow 3s ease infinite}
+@keyframes vGlow{0%,100%{text-shadow:0 0 40px var(--accent)}50%{text-shadow:0 0 80px var(--accent),0 0 120px var(--accent)}}
+.welcome h1{font-size:32px;margin-bottom:12px}
+.welcome p{color:var(--muted);margin-bottom:32px;font-size:14px}
+.examples{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:24px}
+.example{padding:16px;background:var(--s1);border:1px solid var(--b);border-radius:12px;cursor:pointer;text-align:left;transition:0.2s}
+.example:hover{background:var(--s2);border-color:var(--accent);transform:translateY(-2px)}
+.example-title{font-weight:600;margin-bottom:4px;font-size:14px}
+.example-desc{font-size:13px;color:var(--muted)}
+.input-area{padding:16px 20px;border-top:1px solid var(--b)}
+.input-container{max-width:800px;margin:0 auto;position:relative}
+.input-wrapper{background:var(--s2);border:1px solid var(--b2);border-radius:16px;padding:12px 50px 12px 50px;display:flex;align-items:flex-end;gap:12px;transition:0.2s}
+.input-wrapper:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,62,0,0.1)}
+.image-preview{position:absolute;bottom:100%;left:0;margin-bottom:8px;background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:8px;display:none}
+.image-preview img{max-width:200px;max-height:200px;border-radius:8px}
+.image-preview.remove{position:absolute;top:-8px;right:-8px;width:24px;height:24px;background:var(--accent);border:none;border-radius:50%;color:#fff;cursor:pointer}
+textarea{flex:1;background:transparent;border:none;color:var(--txt);resize:none;font-family:inherit;font-size:15px;line-height:1.5;max-height:200px}
+textarea:focus{outline:none}
+textarea::placeholder{color:var(--muted)}
+.input-actions{position:absolute;left:12px;bottom:12px;display:flex;gap:4px}
+.input-btn{width:32px;height:32px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.input-btn:hover{background:var(--s3);color:var(--txt)}
+.send-btn{position:absolute;right:8px;bottom:8px;width:32px;height:32px;border:none;background:var(--accent);color:#fff;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:0.2s}
+.send-btn:disabled{background:var(--s3);cursor:not-allowed;opacity:0.5}
+.send-btn:hover:not(:disabled){transform:scale(1.05)}
+.stop-btn{background:#ef4444}
+.typing{display:flex;gap:4px;padding:8px 0}
+.typing span{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:bounce 1.4s infinite}
+.typing span:nth-child(2){animation-delay:0.2s}
+.typing span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99}
+.overlay.active{display:block}
+@media(max-width:768px){.msg.user.content{max-width:85%}.examples{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="intro"><div class="intro-v">V</div></div>
+<div class="overlay" id="overlay"></div>
+<div class="sidebar" id="sidebar">
+  <div class="logo"><div class="logo-v">V</div>VXAI-PRO</div>
+  <button class="new-chat-btn" id="newChatBtn">+ New Chat</button>
+  <div class="chats" id="chatsList"></div>
+  <div class="user-section">
+    <div class="user-avatar">U</div>
+    <div style="flex:1;font-size:14px">User</div>
+  </div>
+</div>
+<div class="main">
+  <div class="header">
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div style="font-weight:600" id="chatTitle">VXAI-PRO</div>
+  </div>
+  <div class="messages" id="messages">
+    <div class="welcome" id="welcome">
+      <div class="welcome-logo">V</div>
+      <h1>How can I help you today?</h1>
+      <p>VXAI-PRO Neural Engine</p>
+      <div class="examples">
+        <div class="example" data-prompt="Explain quantum computing in simple terms">
+          <div class="example-title">Explain concepts</div>
+          <div class="example-desc">Quantum computing explained</div>
+        </div>
+        <div class="example" data-prompt="Write a Python script to scrape a website">
+          <div class="example-title">Write code</div>
+          <div class="example-desc">Python web scraper</div>
+        </div>
+        <div class="example" data-prompt="Give me ideas for a sci-fi story">
+          <div class="example-title">Creative writing</div>
+          <div class="example-desc">Sci-fi story ideas</div>
+        </div>
+        <div class="example" data-prompt="Help me debug this JavaScript error">
+          <div class="example-title">Debug code</div>
+          <div class="example-desc">JavaScript debugging help</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="input-area">
+    <div class="input-container">
+      <div class="image-preview" id="imagePreview">
+        <img id="previewImg" src="">
+        <button class="remove" onclick="removeImage()">×</button>
+      </div>
+      <div class="input-wrapper">
+        <div class="input-actions">
+          <label class="input-btn" title="Upload image">
+            <input type="file" id="imageInput" accept="image/*" style="display:none">
+            📎
+          </label>
+        </div>
+        <textarea id="input" placeholder="Message VXAI-PRO..." rows="1"></textarea>
+        <button class="send-btn" id="sendBtn" disabled>↑</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+marked.setOptions({highlight:function(code,lang){if(lang&&hljs.getLanguage(lang)){return hljs.highlight(code,{language:lang}).value}return hljs.highlightAuto(code).value}});
+let chats=JSON.parse(localStorage.getItem('vxai_chats')||'[]');let currentChatId=localStorage.getItem('vxai_current')||null;let currentImage=null;let isStreaming=false;
+const input=document.getElementById('input');const sendBtn=document.getElementById('sendBtn');const messages=document.getElementById('messages');const welcome=document.getElementById('welcome');const chatsList=document.getElementById('chatsList');const newChatBtn=document.getElementById('newChatBtn');const menuBtn=document.getElementById('menuBtn');const sidebar=document.getElementById('sidebar');const overlay=document.getElementById('overlay');const imageInput=document.getElementById('imageInput');const imagePreview=document.getElementById('imagePreview');const previewImg=document.getElementById('previewImg');const chatTitle=document.getElementById('chatTitle');
+function init(){if(chats.length===0)createNewChat();else if(currentChatId)loadChat(currentChatId);else loadChat(chats[0].id);renderChats();if(window.innerWidth<=768){sidebar.classList.add('hidden')}}
+function createNewChat(){const id=Date.now().toString(36);const chat={id,title:'New Chat',messages:[],created:Date.now()};chats.unshift(chat);currentChatId=id;saveChats();loadChat(id);renderChats()}
+function loadChat(id){currentChatId=id;localStorage.setItem('vxai_current',id);const chat=chats.find(c=>c.id===id);if(!chat)return;chatTitle.textContent=chat.title;messages.innerHTML='';if(chat.messages.length===0){messages.appendChild(welcome);welcome.style.display='block'}else{welcome.style.display='none';chat.messages.forEach(msg=>renderMessage(msg.role,msg.content,false))}renderChats();if(window.innerWidth<=768){sidebar.classList.add('hidden');overlay.classList.remove('active')}}
+function renderChats(){chatsList.innerHTML=chats.map(chat=>`<div class="chat-item ${chat.id===currentChatId?'active':''}" data-id="${chat.id}"><div class="chat-item-title">${chat.title}</div><div class="chat-actions"><button class="chat-action rename-btn" data-id="${chat.id}" title="Rename">✏️</button><button class="chat-action delete-btn" data-id="${chat.id}" title="Delete">🗑️</button></div></div>`).join('')}
+chatsList.onclick=(e)=>{const chatItem=e.target.closest('.chat-item');const deleteBtn=e.target.closest('.delete-btn');const renameBtn=e.target.closest('.rename-btn');if(deleteBtn){e.preventDefault();e.stopPropagation();const id=deleteBtn.dataset.id;if(confirm('Delete this chat?')){chats=chats.filter(c=>c.id!==id);if(currentChatId===id){if(chats.length>0)loadChat(chats[0].id);else createNewChat()}saveChats();renderChats()}return false}if(renameBtn){e.preventDefault();e.stopPropagation();const id=renameBtn.dataset.id;const chat=chats.find(c=>c.id===id);const newTitle=prompt('Rename chat:',chat.title);if(newTitle&&newTitle.trim()){chat.title=newTitle.trim();if(id===currentChatId)chatTitle.textContent=newTitle.trim();saveChats();renderChats()}return false}if(chatItem&&!deleteBtn&&!renameBtn){loadChat(chatItem.dataset.id)}};
+function saveChats(){localStorage.setItem('vxai_chats',JSON.stringify(chats))}
+input.oninput=()=>{sendBtn.disabled=!input.value.trim()&&!currentImage;input.style.height='auto';input.style.height=Math.min(input.scrollHeight,200)+'px'};
+input.onkeydown=(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!sendBtn.disabled&&!isStreaming)sendMessage()}};
+sendBtn.onclick=()=>{if(isStreaming)stopStreaming();else sendMessage()};
+newChatBtn.onclick=createNewChat;
+menuBtn.onclick=()=>{sidebar.classList.toggle('hidden');overlay.classList.toggle('active')};
+overlay.onclick=()=>{sidebar.classList.add('hidden');overlay.classList.remove('active')};
+document.querySelectorAll('.example').forEach(ex=>{ex.onclick=()=>{input.value=ex.dataset.prompt;input.oninput();input.focus()}});
+imageInput.onchange=(e)=>{const file=e.target.files[0];if(file){currentImage=file;const reader=new FileReader();reader.onload=(e)=>{previewImg.src=e.target.result;imagePreview.style.display='block';input.oninput()};reader.readAsDataURL(file)}};
+function removeImage(){currentImage=null;imagePreview.style.display='none';imageInput.value='';input.oninput()}
+async function sendMessage(){const text=input.value.trim();if(!text&&!currentImage)return;const chat=chats.find(c=>c.id===currentChatId);if(chat.messages.length===0){chat.title=text.substring(0,30)||'Image chat';chatTitle.textContent=chat.title;renderChats()}welcome.style.display='none';const userMsg={role:'user',content:text||'[Image]'};chat.messages.push(userMsg);renderMessage('user',text||'[Image uploaded]',true);input.value='';input.style.height='auto';sendBtn.disabled=true;sendBtn.innerHTML='⏹';sendBtn.classList.add('stop-btn');isStreaming=true;const aiMsg={role:'assistant',content:''};chat.messages.push(aiMsg);const msgDiv=renderMessage('ai','',true);const contentDiv=msgDiv.querySelector('.content');try{const formData=new FormData();formData.append('message',text);formData.append('history',JSON.stringify(chat.messages.slice(0,-2)));if(currentImage)formData.append('image',currentImage);removeImage();const res=await fetch('/.netlify/functions/gemini',{method:'POST',body:formData});const reader=res.body.getReader();const decoder=new TextDecoder();while(true){const{done,value}=await reader.read();if(done)break;const chunk=decoder.decode(value);aiMsg.content+=chunk;contentDiv.innerHTML=marked.parse(aiMsg.content);hljs.highlightAll();addCopyButtons(contentDiv);messages.scrollTop=messages.scrollHeight}}catch(err){aiMsg.content='⚠️ Error: '+err.message;contentDiv.innerHTML=marked.parse(aiMsg.content)}isStreaming=false;sendBtn.innerHTML='↑';sendBtn.classList.remove('stop-btn');sendBtn.disabled=false;saveChats()}
+function stopStreaming(){isStreaming=false;sendBtn.innerHTML='↑';sendBtn.classList.remove('stop-btn')}
+function renderMessage(role,text,scroll){const wrapper=document.createElement('div');wrapper.className='msg-wrapper '+role;const div=document.createElement('div');div.className='msg '+role;if(role==='ai'&&text===''){div.innerHTML=`<div class="avatar">V</div><div class="content"><div class="typing"><span></span><span></span></div></div>`}else{div.innerHTML=`<div class="avatar">${role==='user'?'U':'V'}</div><div class="content">${role==='ai'?marked.parse(text):text}</div>`}wrapper.appendChild(div);messages.appendChild(wrapper);if(scroll)messages.scrollTop=messages.scrollHeight;if(role==='ai'&&text!==''){hljs.highlightAll();addCopyButtons(div.querySelector('.content'))}return div}
+function addCopyButtons(container){container.querySelectorAll('pre').forEach(pre=>{if(pre.querySelector('.code-header'))return;const code=pre.querySelector('code');const lang=code.className.match(/language-(\w+)/)?.[1]||'text';const header=document.createElement('div');header.className='code-header';header.innerHTML=`<span>${lang}</span><button class="copy-btn">Copy</button>`;header.querySelector('.copy-btn').onclick=()=>{navigator.clipboard.writeText(code.textContent);header.querySelector('.copy-btn').textContent='Copied!';setTimeout(()=>header.querySelector('.copy-btn').textContent='Copy',2000)};pre.insertBefore(header,code)})}
+window.addEventListener('resize',()=>{if(window.innerWidth>768){sidebar.classList.remove('hidden');overlay.classList.remove('active')}});
+init();
+</script>
+</body>
+</html>
